@@ -8,19 +8,20 @@ from langchain.chains.retrieval import create_retrieval_chain
 from langchain import hub
 
 if __name__ == '__main__':
-    print("hi")
-    pdf_path = "/home/akugel/Documents/projects/RHOAI/langchain_udemy/vectorstore-in-memory/react_paper.pdf"
-    loader = PyPDFLoader(file_path=pdf_path)
+    path = "documents/alpha_zero.pdf"
+    loader = PyPDFLoader(file_path=path)
     documents = loader.load()
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=30, separator="\n")
     docs = text_splitter.split_documents(documents=documents)
 
     embeddings = OpenAIEmbeddings()
     vectorstore = FAISS.from_documents(docs, embeddings)
-    vectorstore.save_local("faiss_index_react")
+
+    vectorstore_name = "faiss_index_" + path.split("/")[1].split(".")[0]
+    vectorstore.save_local(vectorstore_name)
 
     new_vectorstore = FAISS.load_local(
-        "faiss_index_react", embeddings, allow_dangerous_deserialization=True
+        vectorstore_name, embeddings, allow_dangerous_deserialization=True
      )
     
     retrieval_qa_chat_prompt = hub.pull("langchain-ai/retrieval-qa-chat")
@@ -31,5 +32,6 @@ if __name__ == '__main__':
         new_vectorstore.as_retriever(), combine_docs_chain
     )
 
-    res = retrieval_chain.invoke({"input": "Give me the gist of ReAct in 3 sentences"})
+    prompt = input(f"\n\nAsk the quesiton you would like to ask of your {path.split('/')[1]} Document:\n")
+    res = retrieval_chain.invoke({"input": prompt})
     print(res["answer"])
