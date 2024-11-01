@@ -17,7 +17,7 @@ if __name__ == '__main__':
     embeddings = OpenAIEmbeddings()
     vectorstore = FAISS.from_documents(docs, embeddings)
 
-    vectorstore_name = "faiss_index_" + path.split("/")[1].split(".")[0]
+    vectorstore_name = "faiss_index/" + path.split("/")[1].split(".")[0]
     vectorstore.save_local(vectorstore_name)
 
     new_vectorstore = FAISS.load_local(
